@@ -86,6 +86,7 @@ function handleProxyChange() {
         const savedCustomProxy = localStorage.getItem('customGithubProxy');
         if (savedCustomProxy) {
             customProxyInput.value = savedCustomProxy;
+            githubProxy = savedCustomProxy; // 确保全局变量也被设置
         }
     } else {
         customProxyContainer.classList.add('hidden');
@@ -127,13 +128,14 @@ function handleCustomProxyChange() {
 function loadProxySetting() {
     const savedProxy = localStorage.getItem('githubProxy');
     if (savedProxy) {
-        githubProxy = savedProxy;
+        githubProxy = savedProxy; // 确保全局变量被设置
         if (savedProxy === 'custom') {
             proxySelect.value = 'custom';
             customProxyContainer.classList.remove('hidden');
             const savedCustomProxy = localStorage.getItem('customGithubProxy');
             if (savedCustomProxy) {
                 customProxyInput.value = savedCustomProxy;
+                githubProxy = savedCustomProxy; // 确保全局变量也被设置
             }
         } else {
             proxySelect.value = githubProxy;
