@@ -69,6 +69,31 @@
                         </select>
                     </div>
                 </div>
+
+                <!-- GitHub代理设置 -->
+                <div class="miuix-card">
+                    <div class="miuix-card-header">
+                        <h3 class="miuix-card-title">GitHub代理</h3>
+                    </div>
+                    <div class="miuix-card-content">
+                        <select id="proxy-select" class="miuix-select">
+                            <option value="">无代理</option>
+                            <option value="https://github.akams.cn/">https://github.akams.cn/</option>
+                            <option value="https://gh-proxy.com/">https://gh-proxy.com/</option>
+                            <option value="custom">自定义</option>
+                        </select>
+                        <div id="custom-proxy-container" class="miuix-form-field hidden" style="margin-top: 12px;">
+                            <label class="miuix-form-label">自定义代理地址</label>
+                            <input type="text" id="custom-proxy-input" class="miuix-input" placeholder="例如: https://your-proxy.com/">
+                            <div class="miuix-form-help">
+                                请输入自定义代理服务器地址，确保以 http:// 或 https:// 开头
+                            </div>
+                        </div>
+                        <div class="miuix-form-help">
+                            用于加速GitHub文件下载和图片显示
+                        </div>
+                    </div>
+                </div>
             </aside>
 
             <!-- 内容区域 -->

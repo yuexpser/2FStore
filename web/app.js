@@ -3,6 +3,7 @@ let appsData = [];
 let filteredApps = [];
 let currentCategory = 'all';
 let currentSort = 'name';
+let githubProxy = ''; // 新增全局变量存储GitHub代理URL
 
 // DOM元素
 const appList = document.getElementById('app-list');
@@ -16,9 +17,13 @@ const sortSelect = document.getElementById('sort-select');
 const submitAppBtn = document.getElementById('submit-app-btn');
 const submitModal = document.getElementById('submit-modal');
 const closeModal = document.querySelector('.miuix-modal-close');
+const proxySelect = document.getElementById('proxy-select'); // 新增代理选择元素
+const customProxyContainer = document.getElementById('custom-proxy-container'); // 自定义代理容器
+const customProxyInput = document.getElementById('custom-proxy-input'); // 自定义代理输入框
 
 // 初始化应用
 document.addEventListener('DOMContentLoaded', () => {
+    loadProxySetting(); // 加载保存的代理设置
     loadAppsData();
     setupEventListeners();
 });
@@ -36,6 +41,15 @@ function setupEventListeners() {
     });
     closeModal.addEventListener('click', () => {
         submitModal.classList.add('hidden');
+    });
+    
+    // 监听代理设置变化
+    proxySelect.addEventListener('change', handleProxyChange);
+    
+    // 监听自定义代理输入框变化
+    customProxyInput.addEventListener('blur', handleCustomProxyChange);
+    customProxyInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') handleCustomProxyChange();
     });
     
     // 点击模态框背景关闭
@@ -64,25 +78,77 @@ function setupEventListeners() {
     });
 }
 
-// 加载应用数据
-async function loadAppsData() {
-    try {
-        // 显示加载动画
-        showLoading();
-        
-        const response = await fetch('./app_details.json');
-        const data = await response.json();
-        appsData = data.apps || [];
-        
-        // 提取所有分类
-        extractCategories();
-        
-        // 初始显示所有应用
-        filterApps();
-    } catch (error) {
-        console.error('加载应用数据失败:', error);
-        showError('加载应用数据失败，请稍后再试。');
+// 处理代理设置变化
+function handleProxyChange() {
+    if (proxySelect.value === 'custom') {
+        customProxyContainer.classList.remove('hidden');
+        // 如果之前有保存的自定义代理，则加载它
+        const savedCustomProxy = localStorage.getItem('customGithubProxy');
+        if (savedCustomProxy) {
+            customProxyInput.value = savedCustomProxy;
+        }
+    } else {
+        customProxyContainer.classList.add('hidden');
+        githubProxy = proxySelect.value;
+        // 保存代理设置到localStorage
+        localStorage.setItem('githubProxy', githubProxy);
+        // 重新加载应用数据以应用新的代理设置
+        loadAppsData();
     }
+}
+
+// 处理自定义代理变化
+function handleCustomProxyChange() {
+    let customProxy = customProxyInput.value.trim();
+    
+    // 验证URL格式
+    if (customProxy && !customProxy.startsWith('http://') && !customProxy.startsWith('https://')) {
+        alert('请输入有效的URL，必须以 http:// 或 https:// 开头');
+        return;
+    }
+    
+    // 确保URL以斜杠结尾
+    if (customProxy && !customProxy.endsWith('/')) {
+        customProxy += '/';
+    }
+    
+    githubProxy = customProxy;
+    customProxyInput.value = customProxy;
+    
+    // 保存代理设置到localStorage
+    localStorage.setItem('githubProxy', 'custom');
+    localStorage.setItem('customGithubProxy', customProxy);
+    
+    // 重新加载应用数据以应用新的代理设置
+    loadAppsData();
+}
+
+// 加载保存的代理设置
+function loadProxySetting() {
+    const savedProxy = localStorage.getItem('githubProxy');
+    if (savedProxy) {
+        githubProxy = savedProxy;
+        if (savedProxy === 'custom') {
+            proxySelect.value = 'custom';
+            customProxyContainer.classList.remove('hidden');
+            const savedCustomProxy = localStorage.getItem('customGithubProxy');
+            if (savedCustomProxy) {
+                customProxyInput.value = savedCustomProxy;
+            }
+        } else {
+            proxySelect.value = githubProxy;
+        }
+    }
+}
+
+// 通过代理URL处理函数
+function getProxyUrl(url) {
+    if (!githubProxy || !url) return url;
+    // 只对GitHub相关URL应用代理
+    if (url.includes('github.com') || url.includes('githubusercontent.com')) {
+        return githubProxy + url;
+    }
+    return url;
 }
 
 // 提取所有分类
@@ -235,7 +301,7 @@ function createAppCard(app) {
         <div class="miuix-card app-card" data-app-id="${app.id}">
             <div class="app-card-header">
                 <div class="app-icon">
-                    ${iconUrl ? `<img src="${iconUrl}" alt="${app.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">` : initial}
+                    ${iconUrl ? `<img src="${getProxyUrl(iconUrl)}" alt="${app.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">` : initial}
                 </div>
                 <div class="app-info">
                     <div class="app-name">${app.name}</div>
@@ -264,7 +330,7 @@ function showAppDetail(appId) {
     appDetailContent.innerHTML = `
         <div class="app-detail-header">
             <div class="app-detail-icon">
-                ${iconUrl ? `<img src="${iconUrl}" alt="${app.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">` : initial}
+                ${iconUrl ? `<img src="${getProxyUrl(iconUrl)}" alt="${app.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">` : initial}
             </div>
             <div class="app-detail-info">
                 <div class="app-detail-name">${app.name}</div>
@@ -283,7 +349,7 @@ function showAppDetail(appId) {
         </div>
         
         <div class="app-detail-actions">
-            ${app.downloadUrl ? `<a href="${app.downloadUrl}" class="download-btn" download><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>下载应用</a>` : ''}
+            ${app.downloadUrl ? `<a href="${getProxyUrl(app.downloadUrl)}" class="download-btn" download><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>下载应用</a>` : ''}
             <a href="${app.repository}" target="_blank" class="repo-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>查看仓库</a>
         </div>
         
@@ -292,7 +358,7 @@ function showAppDetail(appId) {
                 <h3>截图</h3>
                 <div class="screenshot-container">
                     ${app.screenshots.map(screenshot => `
-                        <img src="${screenshot}" alt="应用截图" class="screenshot">
+                        <img src="${getProxyUrl(screenshot)}" alt="应用截图" class="screenshot">
                     `).join('')}
                 </div>
             </div>
@@ -359,4 +425,25 @@ function showLoading() {
             <div class="spinner"></div>
         </div>
     `;
+}
+
+// 加载应用数据
+async function loadAppsData() {
+    try {
+        // 显示加载动画
+        showLoading();
+        
+        const response = await fetch('./app_details.json');
+        const data = await response.json();
+        appsData = data.apps || [];
+        
+        // 提取所有分类
+        extractCategories();
+        
+        // 初始显示所有应用
+        filterApps();
+    } catch (error) {
+        console.error('加载应用数据失败:', error);
+        showError('加载应用数据失败，请稍后再试。');
+    }
 }

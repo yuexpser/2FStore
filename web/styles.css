@@ -1057,71 +1057,53 @@ body {
     margin-right: 6px;
 }
 
-/* 响应式调整 */
-@media (max-width: 768px) {
-    .miuix-content {
-        flex-direction: column;
-    }
+/* 表单帮助文本 */
+.miuix-form-help {
+    font-size: 12px;
+    color: var(--miuix-color-on-surface-variant);
+    margin-top: 8px;
+}
 
-    /* 隐藏标题 */
-    .miuix-topbar-title {
-        display: none;
-    }
-    
-    /* 隐藏侧栏 */
-    .miuix-sidebar {
-        display: none;
-    }
-    
-    .miuix-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-    
-    .miuix-main {
-        padding: 16px;
-    }
-    
-    /* 隐藏提交应用按钮 */
-    #submit-app-btn {
-        display: none !important;
-    }
-    
-    .app-detail-header {
-        flex-direction: column;
-        text-align: center;
-        padding: 20px;
-    }
-    
-    .app-detail-icon {
-        margin-right: 0;
-        margin-bottom: 16px;
-    }
-    
-    .app-detail-actions {
-        flex-direction: column;
-        margin: 0 16px 16px;
-        padding: 16px;
-    }
-    
-    .download-btn, .repo-btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .app-detail-description {
-        margin: 16px;
-    }
-    
-    .app-screenshots {
-        margin: 0 16px 16px;
-    }
-    
-    .app-last-update {
-        margin: 0 16px 16px;
-    }
-    
-    .screenshot-container {
-        grid-template-columns: 1fr;
-    }
+/* 表单字段 */
+.miuix-form-field {
+    margin-bottom: 16px;
+}
+
+.miuix-form-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--miuix-color-on-surface);
+}
+
+.miuix-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid var(--miuix-color-outline);
+    border-radius: 8px;
+    background-color: var(--miuix-color-surface);
+    color: var(--miuix-color-on-surface);
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.miuix-input:focus {
+    outline: none;
+    border-color: var(--miuix-color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--miuix-color-primary-rgb), 0.2);
+}
+
+/* 应用卡片 */
+.app-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--miuix-color-outline);
+}
+
+.app-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-color: var(--miuix-color-primary);
 }
